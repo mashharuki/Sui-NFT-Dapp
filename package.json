@@ -1,0 +1,18 @@
+{
+  "name": "Sui-NFT-Dapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "contract": "pnpm -F \"contract\"",
+    "frontend": "pnpm -F \"frontend\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x",
+    "pnpm": "8.x"
+  }
+}
