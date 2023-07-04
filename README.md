@@ -21,3 +21,15 @@ Sui Network 上で動く簡易マーケットプレイス dapp 用リポジト�
   ```bash
   pnpm contract run deploy
   ```
+
+- フロントエンドのビルド
+
+  ```bash
+  pnpm frontend run build
+  ```
+
+- フロントエンドの起動
+
+  ```bash
+  pnpm frontend run start
+  ```
