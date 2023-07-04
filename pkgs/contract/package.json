@@ -1,0 +1,15 @@
+{
+  "name": "contract",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "sui move test",
+    "build": "sui move build",
+    "deploy": "sui client publish --gas-budget 100000000 --skip-dependency-verification"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
