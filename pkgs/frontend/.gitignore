@@ -1,3 +1,10 @@
-node_modules
-.env
-**/.DS_Store
+.vercel/
+node_modules/*
+package-lock.json
+yarn.lock
+.next
+move/build/*
+move/sui.log.*
+.env.local
+*/build/sui.log.*
+.DS_Store
