@@ -40,6 +40,9 @@ export const moveCallTransferNft = async (props: {
   const moduleName = "dev_nft";
   const methodName = "transfer";
 
+  console.log("tx:", props.id);
+  console.log("toAddress:", props.toAddress);
+
   tx.moveCall({
     target: `${NFT_PACKAGE_ID}::${moduleName}::${methodName}`,
     arguments: [

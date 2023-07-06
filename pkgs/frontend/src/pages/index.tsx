@@ -1,31 +1,64 @@
+import { TransactionBlock } from "@mysten/sui.js";
 import {
   ConnectButton, useWallet
 } from '@suiet/wallet-kit';
 import { useEffect, useState } from 'react';
-import ChatInput from 'src/components/ChatInput';
-import { PostCard } from 'src/components/PostCard';
+import NftCard from 'src/components/NftCard';
 import { SuiObjectLinkButton } from 'src/components/SuiObjectLinkButton';
-import { SUITTER_PACKAGE_ID, SUITTER_RECENT_POSTS_OBJECT_ID } from 'src/config/constants';
-import { getRecentPostIdList, getRecentPostObjectList } from 'src/suitterLib/client';
-import { SuitterPost } from 'src/suitterLib/types';
-
+import LoadingIndicator from 'src/components/common/LoadingIndicator';
+import { NFT_PACKAGE_ID } from 'src/config/constants';
+import { getAssets } from 'src/suitterLib/client';
+import { NFTType } from 'src/suitterLib/types';
+import { moveCallMintNft } from "./../suitterLib/moveCall";
 
 /**
  * Pageコンポーネント
  * @returns 
  */
 const Page = () => {
-  const [recentPostList, setRecentPostList] = useState<SuitterPost[]>([])
-  const { address } = useWallet();
+  const [nfts, setNfts] = useState<NFTType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { 
+    address,
+    signAndExecuteTransactionBlock
+  } = useWallet();
 
   /**
-   * 投稿内容を取得するためのメソッド
+   * NFTを取得するためのメソッド
    */
-  const getPosts = async () => {
-    const postIdList:any = await getRecentPostIdList()
-    const postList:any = await getRecentPostObjectList(postIdList)
-    console.log(postList)
-    setRecentPostList(postList)
+  const getNfts = async () => {
+    getAssets(address!, setNfts);
+  }
+
+  /**
+   * NFTをミントするメソッド
+   */
+  const mint = async() => {
+    setIsLoading(true);
+    // トランザクションオブジェクトを生成
+    const tx = new TransactionBlock();
+    // moveCallTransferNft
+    moveCallMintNft({
+      tx, 
+      name: "some name",
+      description: "some description",
+      url: "https://cdn.britannica.com/94/194294-138-B2CF7780/overview-capybara.jpg?w=800&h=450&c=crop"
+    });
+
+    try {
+      // トランザクションに署名＆送信
+      await signAndExecuteTransactionBlock({ 
+        transactionBlock: tx 
+      });
+      
+      alert("Mint Success!!");
+      setIsLoading(false);
+    } catch(err) {
+      console.log("err:", err);
+      alert("Mint fail...");
+      setIsLoading(false);
+    }
   }
 
   /**
@@ -49,19 +82,23 @@ const Page = () => {
       <div className="text-sm mb-4">
         <span className="flex items-center">
           PACKAGE_ID
-          <SuiObjectLinkButton id={SUITTER_PACKAGE_ID} />
+          <SuiObjectLinkButton id={NFT_PACKAGE_ID} />
         </span>
       </div>
       <div className="text-sm mb-4">
         <span className="flex items-center">
-          RECENT_POSTS
-          <SuiObjectLinkButton id={SUITTER_RECENT_POSTS_OBJECT_ID} />
+          <button
+            className="py-2 px-4 bg-gradient-to-r from-green-400 to-blue-500 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+            onClick={mint}
+          >
+            mint NFT
+          </button>
         </span>
       </div>
       <button
-        onClick={getPosts}
+        onClick={getNfts}
       >
-        get posts
+        get nfts
       </button>
     </div>
   )
@@ -70,33 +107,49 @@ const Page = () => {
    * 中央列用のコンポーネント
    * @returns 
    */
-  const CenterPart = () => (
-    <div className="w-1/2 p-4 border-slate-600 border-x-[0.5px] flex flex-col h-screen">
-      <div className="font-bold text-lg mb-4 text-white">Timeline</div>
-      <div className="overflow-auto flex-grow gap-1">
-        {
-          recentPostList.map((post) => (
-            <>
-              <PostCard key={post.id} post={post} />
-              {/* <hr className="bg-slate-900 h-[0.5px]" /> */}
-            </>
-          ))
-        }
+  const CenterPart = () => {
+    return(
+      <div className="w-3/4 p-4 border-slate-600 border-x-[0.5px] flex flex-col h-screen">
+        <div className="font-bold text-lg mb-4 text-white">NFTs</div>
+        <div className="overflow-auto flex-grow gap-1">
+          {
+            nfts.map((nft, index) => (
+              <>
+                <NftCard
+                  key={index}
+                  id={nft.data.objectId}
+                  name={nft.data.content.fields.name}
+                  description={nft.data.content.fields.description}
+                  url={nft.data.content.fields.url}
+                  setIsLoading={setIsLoading}
+                  signAndExecuteTransactionBlock={signAndExecuteTransactionBlock}
+                />
+              </>
+            ))
+          }
+        </div>
       </div>
-      <div className="mt-auto">
-        <ChatInput />
-      </div>
-    </div>
-  )
+    )
+  }
 
   useEffect(() => {
-    getPosts();
+    getNfts();
   },[])
 
   return (
     <main className="flex min-h-screen bg-slate-900">
-      <LeftPart />
-      <CenterPart />
+      <>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-screen w-screen">
+            <LoadingIndicator />
+          </div>
+        ) : (
+          <>
+            <LeftPart />
+            <CenterPart />
+          </>
+        )}
+      </>
     </main >
   )
 }
