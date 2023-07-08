@@ -24,6 +24,9 @@ const Page = () => {
     signAndExecuteTransactionBlock
   } = useWallet();
 
+  // トランザクションオブジェクトを生成
+  const tx = new TransactionBlock();
+
   /**
    * NFTを取得するためのメソッド
    */
@@ -36,8 +39,6 @@ const Page = () => {
    */
   const mint = async() => {
     setIsLoading(true);
-    // トランザクションオブジェクトを生成
-    const tx = new TransactionBlock();
     // moveCallTransferNft
     moveCallMintNft({
       tx, 
@@ -48,8 +49,9 @@ const Page = () => {
 
     try {
       // トランザクションに署名＆送信
-      await signAndExecuteTransactionBlock({ 
-        transactionBlock: tx 
+      await signAndExecuteTransactionBlock({
+        // @ts-ignore
+        transactionBlock: tx,
       });
       
       alert("Mint Success!!");
